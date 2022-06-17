@@ -10,10 +10,10 @@ def BestPath():
     print(best_path, distance)
 
 
-graph = Graph.Graph(40, 40, 12)
+graph = Graph.Graph(40, 40, 5)
 win = Window.Window(graph)
 
 # win.graph.DisplayDistances()
-#BestPath()
-#win.graph.AntsPath()
-win.DisplayWindow()
+BestPath()
+win.graph.AntsPath(win, 4)
+# win.DisplayWindow()

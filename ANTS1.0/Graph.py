@@ -56,11 +56,12 @@ class Graph:
         # CLEAR CONSOLE
         clear = lambda: os.system('cls')
         clear()
+        self.Possible_paths = self.PossiblePaths()
         for possible_path in self.Possible_paths:
             window.ClearWindow()
             iterations += 1
-            print(f"Searched: {iterations}/{len(self.Possible_paths)}")
-            print(f"Progress: {iterations/len(self.Possible_paths)*100:.2f}%")
+            # print(f"Searched: {iterations}/{len(self.Possible_paths)}")
+            # print(f"Progress: {iterations/len(self.Possible_paths)*100:.2f}%")
             # time.sleep(0.5)
             clear()
             previous_vertex_idx = self.Start_vertex
@@ -94,17 +95,20 @@ class Graph:
         # LIST OF CURRENT ANTS
         ants = []
         for i in range(m):
-            random_vertex_idx = random.randint(0, self.N-1)
+            # random_vertex_idx = random.randint(0, self.N-1)
+            start_vertex = 0
             ant = Ant()
             ants.append(ant)
             # APPEND START VERTEX IDX
-            ant.tabu.append(random_vertex_idx)
-            self.Vertices[random_vertex_idx].Ants_1.append(ant)
+            # ant.tabu.append(random_vertex_idx)
+            ant.tabu.append(start_vertex)
+            # self.Vertices[random_vertex_idx].Ants_1.append(ant)
+            self.Vertices[start_vertex].Ants_1.append(ant)
 
         min_distance = math.inf
         best_path = []
         # MAX CYCLES OF ANT 
-        MC = 100000000
+        MC = 10000
         cycles = 0
         # ANTS GENERATION
         t = 0
@@ -197,13 +201,12 @@ class Graph:
             possible_vertices_idx.remove(vertex_idx)
         return possible_vertices_idx
 
-    def ArePathsEquals(self, p1, p2):
-        p1_copy = copy(p1)
-        p2_copy = copy(p2)
-        p1_copy.sort()
-        p2_copy.sort()
-        for i in range(0, len(p1)):
-            if p1_copy[i] != p2_copy[i]:
+    def ArePathsEquals(self, ants):
+        path = ants[0].tabu
+        if len(path) == 1:
+            return False
+        for ant in ants:
+            if ant.tabu != path:
                 return False
         return True
 

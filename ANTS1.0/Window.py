@@ -49,7 +49,7 @@ class Window:
                     self.window_run = False
             self.ClearWindow()
             self.DrawObjects()
-            self.graph.AntsPath(self, 5)
+            self.graph.AntsPath(self, 10)
             # self.VerticesMoveAnimation(self.graph.Vertices[0], self.graph.Vertices[4], 0.2)
             pygame.display.update()
 
