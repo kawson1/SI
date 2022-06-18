@@ -7,6 +7,9 @@ from Food import Food
 
 
 class Window:
+    FPS = 30
+    clock = pygame.time.Clock()
+
     pygame.init()
     pygame.display.set_caption("ANTS SIMULATOR")
     WINDOW = None
@@ -18,6 +21,7 @@ class Window:
     Ants = []
     Food = []
     Pheromones = []
+    Colony = None
 
     def __init__(self, X_Size, Y_Size):
         self.WINDOW = pygame.display.set_mode((X_Size, Y_Size))
@@ -33,7 +37,9 @@ class Window:
                     self.AddFood(pygame.mouse.get_pos())
             self.DrawObjects()
             # time.sleep(0.05)
-            time.sleep(0.07)
+            # time.sleep(0.03)
+            dt = self.clock.tick(self.FPS) / self.FPS
+            self.PheromonesEvaporation(dt)
             self.ClearWindow()
             # self.VerticesMoveAnimation(self.graph.Vertices[0], self.graph.Vertices[4], 0.2)
             # pygame.display.update()
@@ -43,16 +49,21 @@ class Window:
         pygame.display.update()
 
     def DrawObjects(self):
+        # ANTS
         for ant in self.Ants:
             old_X = ant.X
             old_Y = ant.Y
-            ant.Move(self.X_size, self.Y_size, self.Pheromones, self.Food)
+            ant.Move(self.X_size, self.Y_size, self.Pheromones, self.Food, self.Colony)
             pygame.draw.circle(self.WINDOW, ant.Color, (ant.X, ant.Y), ant.Size)
             self.DrawReceptors()
+        # FOOD
         for f in self.Food:
             pygame.draw.circle(self.WINDOW, f.Color, (f.X, f.Y), f.Size)
+        # PHEROMONES
         for p in self.Pheromones:
             pygame.draw.circle(self.WINDOW, p.Color, (p.X, p.Y), p.Size)
+        # COLONY
+        pygame.draw.circle(self.WINDOW, self.Colony.Color, (self.Colony.X, self.Colony.Y), self.Colony.Size)
         pygame.display.update()
 
     def DrawReceptors(self):
@@ -66,3 +77,11 @@ class Window:
 
     def AddFood(self, position):
         self.Food.append(Food(position[0], position[1]))
+
+    def PheromonesEvaporation(self, dt):
+        for p in list(self.Pheromones):
+            p.EvaporateTime -= dt
+            # p.Color[0] += 1.3
+            # p.Color[1] += 2.59
+            if p.EvaporateTime <= 0:
+                self.Pheromones.remove(p)
