@@ -1,5 +1,6 @@
 import time
 import math
+import threading
 
 import pygame
 
@@ -40,6 +41,7 @@ class Window:
             # time.sleep(0.03)
             dt = self.clock.tick(self.FPS) / self.FPS
             self.PheromonesEvaporation(dt)
+            # self.AntsDies(dt)
             self.ClearWindow()
             # self.VerticesMoveAnimation(self.graph.Vertices[0], self.graph.Vertices[4], 0.2)
             # pygame.display.update()
@@ -50,18 +52,33 @@ class Window:
 
     def DrawObjects(self):
         # ANTS
-        for ant in self.Ants:
-            old_X = ant.X
-            old_Y = ant.Y
-            ant.Move(self.X_size, self.Y_size, self.Pheromones, self.Food, self.Colony)
-            pygame.draw.circle(self.WINDOW, ant.Color, (ant.X, ant.Y), ant.Size)
-            self.DrawReceptors()
+        def HandleAnts():
+            for ant in self.Ants:
+                old_X = ant.X
+                old_Y = ant.Y
+                ant.Move(self.X_size, self.Y_size, self.Pheromones, self.Food, self.Colony)
+                pygame.draw.circle(self.WINDOW, ant.Color, (ant.X, ant.Y), ant.Size)
+                self.DrawReceptors()
         # FOOD
-        for f in self.Food:
-            pygame.draw.circle(self.WINDOW, f.Color, (f.X, f.Y), f.Size)
+        def HandleFood():
+            for f in self.Food:
+                pygame.draw.circle(self.WINDOW, f.Color, (f.X, f.Y), f.Size)
         # PHEROMONES
-        for p in self.Pheromones:
-            pygame.draw.circle(self.WINDOW, p.Color, (p.X, p.Y), p.Size)
+        def HandlePheromones():
+            for p in self.Pheromones:
+                pygame.draw.circle(self.WINDOW, p.Color, (p.X, p.Y), p.Size)
+
+        ants_worker = threading.Thread(target=HandleAnts())
+        food_worker = threading.Thread(target=HandleFood())
+        pheromones_worker = threading.Thread(target=HandlePheromones())
+
+        ants_worker.start()
+        food_worker.start()
+        pheromones_worker.start()
+
+        ants_worker.join()
+        food_worker.join()
+        pheromones_worker.join()
         # COLONY
         pygame.draw.circle(self.WINDOW, self.Colony.Color, (self.Colony.X, self.Colony.Y), self.Colony.Size)
         pygame.display.update()
@@ -85,3 +102,10 @@ class Window:
             # p.Color[1] += 2.59
             if p.EvaporateTime <= 0:
                 self.Pheromones.remove(p)
+
+    def AntsDies(self, dt):
+        for ant in list(self.Ants):
+            ant.LifeTime -= dt
+            if ant.LifeTime <= 0:
+                self.Ants.remove(ant)
+                self.Colony.AddAnt(self.Food, self.Pheromones)

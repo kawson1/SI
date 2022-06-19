@@ -6,7 +6,7 @@ class Pheromone:
     Y = int
     Size = float
     # TIME IN ms
-    EvaporateMaxTime = 400.0
+    EvaporateMaxTime = 600.0
     EvaporateTime = float
     Color = (102, 178, 255)
 

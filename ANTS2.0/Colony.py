@@ -1,3 +1,6 @@
+from Ant import Ant
+
+
 class Colony:
     Size = 30
     Color = (153, 76, 0)
@@ -18,3 +21,6 @@ class Colony:
         print("DONIESIONO JEDZENIE!")
         self.Status()
         return
+
+    def AddAnt(self, food, pheromones):
+        self.Ants.append(Ant(self.X, self.Y, self.Size, food, pheromones))

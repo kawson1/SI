@@ -23,6 +23,7 @@ class Ant:
     ReceptorDistance = 7
     ReceptorAngle = math.pi / 3
     PheromoneDropTime = 6
+    LifeTime = 1200.0
 
     HandlingFood = False
     Angle = int
@@ -30,7 +31,7 @@ class Ant:
     DesiredDirection = None
     LeftReceptor = MiddleReceptor = RightReceptor = None
     # IF ANT SEE FOOD TARGET IS FOOD
-    IsTargetFood = bool
+    IsTarget = bool
     # IF ANT DOESN'T SEE ANY FOOD && DOESN'T HANDLE ANY FOOD SHE IS SearchingForFood
     SearchingForFood = bool
     PheromoneType = int
@@ -47,11 +48,12 @@ class Ant:
         self.MiddleReceptor = Receptor.Receptor(math.cos(self.Angle) * self.ReceptorDistance, math.sin(self.Angle) * self.ReceptorDistance, food, pheromones)
         self.RightReceptor = Receptor.Receptor(math.cos(self.Angle+self.ReceptorAngle) * self.ReceptorDistance, math.sin(self.Angle+self.ReceptorAngle) * self.ReceptorDistance, food, pheromones)
         self.Receptors = [self.LeftReceptor, self.MiddleReceptor, self.RightReceptor]
-        self.IsTargetFood = False
+        self.IsTarget = False
         self.SearchingForFood = True
         # TIMER not TIME
         self.PheromoneDropColdown = 0
         self.PheromoneType = 0
+        self.LifeTime = self.LifeTime
 
 
     # def __init__(self, Colony_X, Colony_Y, Colony_r, food, pheromones):
@@ -66,24 +68,33 @@ class Ant:
                 colony.FoodDelivered()
                 self.HandlingFood = False
                 self.SearchingForFood = True
+                self.IsTarget = False
             self.FlipAnt()
+            self.X += math.cos(self.Angle) * 2
+            self.Y += math.cos(self.Angle) * 2
 
         if self.CheckField(food):
             self.SearchingForFood = False
-            self.IsTargetFood = False
+            self.IsTarget = False
             self.FlipAnt()
             return
         if self.HandlingFood:
-            self.FollowPheromones()
+            for receptor in self.Receptors:
+                if receptor.CheckColony(colony, self.HandlingFood):
+                    self.IsTarget = True
+                    self.DesiredDirection = pygame.Vector2(receptor.X - self.X, receptor.Y - self.Y)
+                    break
+            if not self.IsTarget:
+                self.FollowPheromones()
             # self.DesiredDirection = pygame.Vector2(math.cos(self.Angle), math.sin(self.Angle))
-        elif not self.IsTargetFood:
+        elif not self.IsTarget:
             for receptor in self.Receptors:
                 if receptor.CheckFood():
-                    self.IsTargetFood = True
+                    self.IsTarget = True
                     # self.DesiredDirection = pygame.Vector2(receptor.X - self.X, receptor.Y - self.Y) / 10
                     self.DesiredDirection = pygame.Vector2(receptor.X - self.X, receptor.Y - self.Y)
                     break
-            if not self.IsTargetFood:
+            if not self.IsTarget:
                 self.FollowPheromones()
                 # self.DesiredDirection = Functions.RandomReceptorDirection(self.Angle, self.ReceptorAngle)
                 # self.DesiredDirection = self.Forward()
@@ -233,7 +244,9 @@ class Ant:
         for f in food:
             # FOOD RADIUS HAVE TO BE SMALLER THAN ANT !!!
             if math.dist((self.X, self.Y), (f.X, f.Y)) <= self.Size + f.Size:
-                food.remove(f)
+                f.Amount -= 1
+                if f.Amount == 0:
+                    food.remove(f)
                 self.HandlingFood = True
                 return 1
         # strength = 0

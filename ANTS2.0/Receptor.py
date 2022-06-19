@@ -27,13 +27,19 @@ class Receptor:
                 return 1
         return 0
 
+    def CheckColony(self, colony, isHandlingFood):
+        if isHandlingFood and math.dist((self.X, self.Y), (colony.X, colony.Y)) <= (self.Size + colony.Size):
+            return 1
+        return 0
+
     def CheckPheromones(self, searchingForFood):
         value = 0.0
-        pheromones = filter(lambda p: True if p.Type == searchingForFood and math.dist((self.X, self.Y), (p.X, p.Y)) <= (self.Size + p.Size) else False, self.Pheromones)
-        for p in pheromones:
-            # value += p.EvaporateTime / p.EvaporateMaxTime
-            value += 1
-        return value
+        pheromones = list(filter(lambda p: True if p.Type == searchingForFood and math.dist((self.X, self.Y), (p.X, p.Y)) <= (self.Size + p.Size) else False, self.Pheromones))
+
+        # for p in pheromones:
+        #     # value += p.EvaporateTime / p.EvaporateMaxTime
+        #     value += 1
+        return len(pheromones)
 
     # offset - DISTANCE BETWEEN ANT AND RECEPTOR
     def UpdatePosition(self, X, Y, angle, offset):
